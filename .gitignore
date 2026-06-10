@@ -1,0 +1,25 @@
+# .NET
+**/bin/
+**/obj/
+**/out/
+**/publish/
+
+# Node
+**/node_modules/
+**/dist/
+**/dist-ssr/
+
+# IDE 
+.vscode/
+.idea/
+
+# Environment
+.env
+.env.local
+.env.production
+.env.development
+*.users-secrets
+
+# OS
+**/logs/
+*.log
