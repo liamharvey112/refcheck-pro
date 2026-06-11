@@ -5,6 +5,7 @@ using RefCheckPro.Domain.Interfaces;
 using RefCheckPro.Infrastructure.Auth;
 using RefCheckPro.Infrastructure.Data;
 using RefCheckPro.Infrastructure.Repositories;
+using RefCheckPro.Infrastructure.Services;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -63,9 +64,12 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IAnalysisRepository, AnalysisRepository>();
 builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<IGoogleAuthService, GoogleAuthService>();
+builder.Services.AddScoped<IGeminiService, GeminiService>();
 
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("Jwt"));
 builder.Services.Configure<GoogleAuthSettings>(builder.Configuration.GetSection("Google"));
+builder.Services.Configure<GeminiSettings>(builder.Configuration.GetSection("Gemini"));
+builder.Services.AddHttpClient<IGeminiService, GeminiService>();
 
 var jwtSettings = builder.Configuration.GetSection("Jwt").Get<JwtSettings>();
 var key = Encoding.UTF8.GetBytes(jwtSettings?.Key ?? throw new InvalidOperationException("JWT Key not configured"));
