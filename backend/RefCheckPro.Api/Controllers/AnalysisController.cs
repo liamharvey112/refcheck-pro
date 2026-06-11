@@ -12,21 +12,23 @@ namespace RefCheckPro.Api.Controllers;
 public class AnalysisController : ControllerBase
 {
     private readonly IAnalysisRepository _analysisRepository;
+    private readonly IGeminiService _geminiService;
 
-    public AnalysisController(IAnalysisRepository analysisRepository)
+    public AnalysisController(IAnalysisRepository analysisRepository, IGeminiService geminiService)
     {
         _analysisRepository = analysisRepository;
+        _geminiService = geminiService;
     }
 
     [HttpGet]
     public async Task<IActionResult> GetMyAnalyses()
     {
         var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
+         
         if (!Guid.TryParse(userIdClaim, out var userId))
-        {
-            return Unauthorized();
-        }
+            {
+                return Unauthorized();
+            }
 
         var analyses = await _analysisRepository.GetByUserIdAsync(userId);
         return Ok(analyses);
@@ -38,9 +40,15 @@ public class AnalysisController : ControllerBase
         var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
         if (!Guid.TryParse(userIdClaim, out var userId))
-        {
-            return Unauthorized();
-        }
+            {
+                return Unauthorized();
+            }
+
+        var aiResult = await _geminiService.AnalyzeCandidateAsync(
+            request.JobDescription,
+            request.ResumeText,
+            request.LinkedInProfile
+        );
 
         var analysis = new Analysis
         {
@@ -49,10 +57,10 @@ public class AnalysisController : ControllerBase
             ResumeText = request.ResumeText,
             LinkedInProfile = request.LinkedInProfile,
             ResumeFileName = request.ResumeFileName,
-            Inconsistencies = request.Inconsistencies,
-            Questions = request.Questions,
-            MissingSkills = request.MissingSkills,
-            Risk = request.Risk
+            Inconsistencies = aiResult.Inconsistencies,
+            Questions = aiResult.Questions,
+            MissingSkills = aiResult.MissingSkills,
+            Risk = aiResult.Risk
         };
 
         var created = await _analysisRepository.CreateAsync(analysis);
@@ -66,8 +74,4 @@ public class CreateAnalysisRequest
     public string ResumeText { get; set; } = string.Empty;
     public string? LinkedInProfile { get; set; }
     public string? ResumeFileName { get; set; }
-    public List<string> Inconsistencies { get; set; } = new List<string>();
-    public List<string> Questions { get; set; } = new List<string>();
-    public List<string> MissingSkills { get; set; } = new List<string>();
-    public string Risk { get; set; } = "Medium";
 }
