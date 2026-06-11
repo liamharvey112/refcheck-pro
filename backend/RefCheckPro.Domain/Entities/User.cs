@@ -9,4 +9,6 @@ public class User
     public string? AvatarUrl { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime? LastLoginAt { get; set; }
+    
+    public ICollection<Analysis> Analyses { get; set; } = new List<Analysis>();
 }
