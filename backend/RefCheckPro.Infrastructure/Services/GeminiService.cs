@@ -30,8 +30,10 @@ public class GeminiService : IGeminiService
 
     private string BuildPrompt(string jobDescription, string resumeText, string? linkedInProfile)
     {
+        var today = DateTime.Now.ToString("MMMM yyyy");
+        
         return $@"
-        You are a hiring assistant. Analyze the following candidate.
+        You are a hiring assistant. Analyze the following candidate. Today's Date is {today}.
 
         Job Description:
         {jobDescription}
@@ -39,15 +41,27 @@ public class GeminiService : IGeminiService
         Resume:
         {resumeText}
 
-        LinkedIn:
+        LinkedIn Profile:
         {linkedInProfile ?? "Not provided"}
 
-        Return ONLY valid JSON:
+        Return ONLY valid JSON. Do not invent information. Only flag clear, obvious issues.
+
+        Important: 
+        - Dates in the past are valid. Only flag dates that are literally impossible (e.g., year 2030).
+        - {today} is the current date. Any date before this is in the past.
+
+        Rules:
+            1. Inconsistencies: Only flag if you see DIRECT contradictions (e.g., resume says 5 years, LinkedIn says 2). Do not flag normal formatting or future dates unless they are actually impossible.
+            2. Questions: Ask about gaps, unclear experience, or missing qualifications.
+            3. Missing skills: List skills from job description clearly missing from both resume and LinkedIn.
+            4. Risk: Low (good match), Medium (some gaps), High (major missing requirements).
+
+        Return JSON:
         {{
-            ""inconsistencies"": [""date/title mismatches""],
-            ""questions"": [""specific reference check questions""],
-            ""missingSkills"": [""skills in JD not in resume""],
-            ""risk"": ""Low/Medium/High""
+            ""inconsistencies"": [""only real contradictions""],
+            ""questions"": [""clarifying questions""],
+            ""missingSkills"": [""skills not found""],
+            ""risk"": ""Low""
         }}";
     }
 
