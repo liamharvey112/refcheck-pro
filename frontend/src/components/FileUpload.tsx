@@ -35,7 +35,7 @@ export const FileUpload = ({ onUploadComplete }: FileUploadProps) => {
         try {
             const response = await axios.post(`${API_BASE}/Upload/resume`, formData, {
                 headers: {
-                    Authorization: `Bearer: ${token}`,
+                    Authorization: `Bearer ${token}`,
                     'Content-Type': 'multipart/form-data'
                 }
             });
