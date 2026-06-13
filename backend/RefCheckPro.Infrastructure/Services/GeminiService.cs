@@ -31,11 +31,9 @@ public class GeminiService : IGeminiService
     private string BuildPrompt(string jobDescription, string resumeText, string? linkedInProfile)
     {
         var today = DateTime.Now.ToString("MMMM yyyy");
-        
+    
         return $@"
-        You are a realistic hiring assistant. Today's date is {today}.
-
-        Analyze the following candidate against the job description.
+        You are a pragmatic hiring assistant. Today's date is {today}.
 
         Job Description:
         {jobDescription}
@@ -46,40 +44,34 @@ public class GeminiService : IGeminiService
         LinkedIn Profile:
         {linkedInProfile ?? "Not provided"}
 
-        RISK ASSESSMENT GUIDELINES:
+        GUIDELINES (not hard rules):
 
-        1. YEARS OF EXPERIENCE:
-            - Candidate meets or exceeds required years → Low risk contribution
-            - Candidate has 50-80% of required years → Medium risk contribution
-            - Candidate has less than 50% of required years → High risk contribution
+            1. YEARS OF EXPERIENCE:
+                - Years are GUIDELINES, not requirements. Job descriptions often inflate years.
+                - INFER seniority from ACCOMPLISHMENTS, not years:
+                    * Leading migrations → senior behavior
+                    * Writing architecture documents → senior behavior
+                    * Owning projects solo → senior behavior
+                    * Mentoring others → senior behavior
+                    * Producing technical strategy → senior behavior
+                - Do NOT use percentage thresholds. A candidate with 1.5-2 years but senior-level accomplishments can be a strong fit for roles asking for 3-5 years.
 
-        2. TECHNICAL SKILLS:
-            - All core technologies match → Low risk contribution
-            - Missing 1-2 core technologies → Medium risk contribution
-            - Missing 3+ core technologies → High risk contribution
+            2. TECHNICAL SKILLS:
+                - Compare skills directly
+                - Missing 1-2 nice-to-have skills → not a problem
 
-        3. LEADERSHIP / SCOPE (if mentioned in JD):
-            - Has led teams or projects at required scope → Low risk
-            - Has participated but not led → Medium risk
-            - No leadership experience when required → High risk
-
-        4. SYSTEM SCALE (if mentioned in JD):
-            - Experience at required scale → Low risk
-            - Experience at smaller scale → Medium risk
-            - No scale experience when required → High risk
-
-        RISK TIERS:
-            - Low: Candidate is a strong fit. Would recommend interview.
-            - Medium: Candidate has significant gaps but could grow. Would consider if other candidates are weak.
-            - High: Candidate is not qualified. Would not recommend interview.
+            3. RISK TIERS:
+                - Low: Skills align, candidate shows senior behaviors (even if years are fewer)
+                - Medium: Significant skill gaps or completely wrong tech stack
+                - High: No relevant experience at all
 
         Return ONLY valid JSON:
-        {{
-            ""inconsistencies"": [""specific gaps between candidate and job requirements""],
-            ""questions"": [""questions to determine if candidate can bridge the gaps""],
-            ""missingSkills"": [""required skills the candidate lacks""],
-            ""risk"": ""Low/Medium/High""
-        }}";
+            {{
+                ""inconsistencies"": [""only direct contradictions, never mention years alone""],
+                ""questions"": [""focus on skills and projects, not years""],
+                ""missingSkills"": [""skills genuinely missing""],
+                ""risk"": ""Low""
+            }}";
     }
 
     private async Task<string> CallGeminiApiSync(string prompt)

@@ -124,5 +124,4 @@ public class CreateAnalysisRequest
     public string ResumeText { get; set; } = string.Empty;
     public string? LinkedInProfile { get; set; }
     public string? ResumeFileName { get; set; }
-    public string? Context { get; set; }
 }
