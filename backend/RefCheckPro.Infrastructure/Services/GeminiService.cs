@@ -33,7 +33,9 @@ public class GeminiService : IGeminiService
         var today = DateTime.Now.ToString("MMMM yyyy");
         
         return $@"
-        You are a hiring assistant. Analyze the following candidate. Today's Date is {today}.
+        You are a realistic hiring assistant. Today's date is {today}.
+
+        Analyze the following candidate against the job description.
 
         Job Description:
         {jobDescription}
@@ -44,35 +46,39 @@ public class GeminiService : IGeminiService
         LinkedIn Profile:
         {linkedInProfile ?? "Not provided"}
 
-        Return ONLY valid JSON. Do not invent information. Only flag clear, obvious issues.
+        RISK ASSESSMENT GUIDELINES:
 
-        Important: 
-        - Dates in the past are valid. Only flag dates that are literally impossible (e.g., year 2030).
-        - {today} is the current date. Any date before this is in the past.
+        1. YEARS OF EXPERIENCE:
+            - Candidate meets or exceeds required years → Low risk contribution
+            - Candidate has 50-80% of required years → Medium risk contribution
+            - Candidate has less than 50% of required years → High risk contribution
 
-        Instructions:
-            1. Focus on PROFESSIONAL EXPERIENCE and TECHNICAL SKILLS first.
-            2. Only ask about education if it's directly relevant to the job (e.g., no degree when required).
-            3. Do NOT ask about education if the candidate already has a degree in progress or completed.
-            4. Prioritize questions about:
-                - Specific technical skills mentioned in the job description
-                - Project leadership and team collaboration
-                - Problem-solving approaches
-                - Experience with the company's tech stack
-            5. For students with work experience, focus questions on the work experience, not the studies.
+        2. TECHNICAL SKILLS:
+            - All core technologies match → Low risk contribution
+            - Missing 1-2 core technologies → Medium risk contribution
+            - Missing 3+ core technologies → High risk contribution
 
-        Rules:
-            1. Inconsistencies: Only flag if you see DIRECT contradictions (e.g., resume says 5 years, LinkedIn says 2). Do not flag normal formatting or future dates unless they are actually impossible.
-            2. Questions: Ask about gaps, unclear experience, or missing qualifications.
-            3. Missing skills: List skills from job description clearly missing from both resume and LinkedIn.
-            4. Risk: Low (good match), Medium (some gaps), High (major missing requirements).
+        3. LEADERSHIP / SCOPE (if mentioned in JD):
+            - Has led teams or projects at required scope → Low risk
+            - Has participated but not led → Medium risk
+            - No leadership experience when required → High risk
 
-        Return JSON:
+        4. SYSTEM SCALE (if mentioned in JD):
+            - Experience at required scale → Low risk
+            - Experience at smaller scale → Medium risk
+            - No scale experience when required → High risk
+
+        RISK TIERS:
+            - Low: Candidate is a strong fit. Would recommend interview.
+            - Medium: Candidate has significant gaps but could grow. Would consider if other candidates are weak.
+            - High: Candidate is not qualified. Would not recommend interview.
+
+        Return ONLY valid JSON:
         {{
-            ""inconsistencies"": [""only real contradictions""],
-            ""questions"": [""clarifying questions""],
-            ""missingSkills"": [""skills not found""],
-            ""risk"": ""Low""
+            ""inconsistencies"": [""specific gaps between candidate and job requirements""],
+            ""questions"": [""questions to determine if candidate can bridge the gaps""],
+            ""missingSkills"": [""required skills the candidate lacks""],
+            ""risk"": ""Low/Medium/High""
         }}";
     }
 
