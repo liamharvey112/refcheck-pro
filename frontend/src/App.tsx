@@ -1,82 +1,101 @@
+import { useState } from 'react';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { AnalysisForm } from './components/AnalysisForm';
+import { HistoryView } from './views/HistoryView';
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
+type Page = 'analyze' | 'history';
+
 function AppContent() {
-  const { user, login, logout, isAuthenticated, loading } = useAuth();
+    const { user, login, logout, isAuthenticated, loading } = useAuth();
+    const [currentPage, setCurrentPage] = useState<Page>('analyze');
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto"></div>
-          <p className="mt-2 text-gray-600">Loading...</p>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="container mx-auto p-6">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">RefCheck Pro</h1>
-          {isAuthenticated ? (
-            <div className="flex items-center gap-4">
-              {user?.avatarUrl && (
-                <img src={user.avatarUrl} alt={user.name} className="w-8 h-8 rounded-full" />
-              )}
-              <span className="text-gray-700">{user?.name}</span>
-              <button
-                onClick={logout}
-                className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700"
-              >
-                Logout
-              </button>
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+                <div className="text-center">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto"></div>
+                    <p className="mt-2 text-gray-600">Loading...</p>
+                </div>
             </div>
-          ) : (
-            <button
-              onClick={login}
-              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center gap-2"
-            >
-              Sign in with Google
-            </button>
-          )}
+        );
+    }
+
+    return (
+        <div className="min-h-screen bg-gray-50">
+            <div className="container mx-auto p-6">
+                <div className="flex justify-between items-center mb-8">
+                    <h1 className="text-3xl font-bold text-gray-900">RefCheck Pro</h1>
+                    {isAuthenticated ? (
+                        <div className="flex items-center gap-4">
+                            <div className="flex gap-2">
+                                <button
+                                    onClick={() => setCurrentPage('analyze')}
+                                    className={`px-3 py-1 rounded ${currentPage === 'analyze' ? 'bg-blue-100 text-blue-700' : 'text-gray-600'}`}
+                                >
+                                    Analyze
+                                </button>
+                                <button
+                                    onClick={() => setCurrentPage('history')}
+                                    className={`px-3 py-1 rounded ${currentPage === 'history' ? 'bg-blue-100 text-blue-700' : 'text-gray-600'}`}
+                                >
+                                    History
+                                </button>
+                            </div>
+                            {user?.avatarUrl && (
+                                <img src={user.avatarUrl} alt={user.name} className="w-8 h-8 rounded-full" />
+                            )}
+                            <span className="text-gray-700">{user?.name}</span>
+                            <button
+                                onClick={logout}
+                                className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700"
+                            >
+                                Logout
+                            </button>
+                        </div>
+                    ) : (
+                        <button
+                            onClick={login}
+                            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center gap-2"
+                        >
+                            Sign in with Google
+                        </button>
+                    )}
+                </div>
+                
+                {isAuthenticated ? (
+                    currentPage === 'analyze' ? <AnalysisForm /> : <HistoryView />
+                ) : (
+                    <div className="bg-white rounded-lg shadow p-6 text-center">
+                        <p className="text-gray-600">Sign in with Google to start analyzing candidates.</p>
+                    </div>
+                )}
+            </div>
         </div>
-        
-        {isAuthenticated ? (
-          <AnalysisForm />
-        ) : (
-          <div className="bg-white rounded-lg shadow p-6 text-center">
-            <p className="text-gray-600">Sign in with Google to start analyzing candidates.</p>
-          </div>
-        )}
-      </div>
-    </div>
-  );
+    );
 }
 
 function App() {
-  if (!GOOGLE_CLIENT_ID || GOOGLE_CLIENT_ID === 'YOUR_GOOGLE_CLIENT_ID') {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center text-red-600">
-          <h1 className="text-2xl font-bold">Configuration Error</h1>
-          <p>Please set VITE_GOOGLE_CLIENT_ID in your .env file</p>
-        </div>
-      </div>
-    );
-  }
+    if (!GOOGLE_CLIENT_ID || GOOGLE_CLIENT_ID === 'YOUR_GOOGLE_CLIENT_ID') {
+        return (
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+                <div className="text-center text-red-600">
+                    <h1 className="text-2xl font-bold">Configuration Error</h1>
+                    <p>Please set VITE_GOOGLE_CLIENT_ID in your .env file</p>
+                </div>
+            </div>
+        );
+    }
 
-  return (
-    <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
-      <AuthProvider>
-        <AppContent />
-      </AuthProvider>
-    </GoogleOAuthProvider>
-  );
+    return (
+        <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
+            <AuthProvider>
+                <AppContent />
+            </AuthProvider>
+        </GoogleOAuthProvider>
+    );
 }
 
 export default App;

@@ -50,6 +50,17 @@ public class GeminiService : IGeminiService
         - Dates in the past are valid. Only flag dates that are literally impossible (e.g., year 2030).
         - {today} is the current date. Any date before this is in the past.
 
+        Instructions:
+            1. Focus on PROFESSIONAL EXPERIENCE and TECHNICAL SKILLS first.
+            2. Only ask about education if it's directly relevant to the job (e.g., no degree when required).
+            3. Do NOT ask about education if the candidate already has a degree in progress or completed.
+            4. Prioritize questions about:
+                - Specific technical skills mentioned in the job description
+                - Project leadership and team collaboration
+                - Problem-solving approaches
+                - Experience with the company's tech stack
+            5. For students with work experience, focus questions on the work experience, not the studies.
+
         Rules:
             1. Inconsistencies: Only flag if you see DIRECT contradictions (e.g., resume says 5 years, LinkedIn says 2). Do not flag normal formatting or future dates unless they are actually impossible.
             2. Questions: Ask about gaps, unclear experience, or missing qualifications.
