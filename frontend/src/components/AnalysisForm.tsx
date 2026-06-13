@@ -17,6 +17,7 @@ export const AnalysisForm = () => {
   const { token } = useAuth();
   const [jobDescription, setJobDescription] = useState('');
   const [resumeText, setResumeText] = useState('');
+  const [resumeFileName, setResumeFileName] = useState<string | null>(null);
   const [linkedInProfile, setLinkedInProfile] = useState('');
   const [useFileUpload, setUseFileUpload] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -25,6 +26,7 @@ export const AnalysisForm = () => {
 
   const handleFileUploadComplete = (extractedText: string, fileName: string) => {
     setResumeText(extractedText);
+    setResumeFileName(fileName);
     setUseFileUpload(false);
   };
 
@@ -37,7 +39,12 @@ export const AnalysisForm = () => {
     try {
       const response = await axios.post(
         `${API_BASE}/analysis`,
-        { jobDescription, resumeText, linkedInProfile },
+        { 
+          jobDescription, 
+          resumeText, 
+          linkedInProfile,
+          resumeFileName 
+        },
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setResult(response.data);
@@ -98,7 +105,22 @@ export const AnalysisForm = () => {
             Resume
           </label>
           {useFileUpload ? (
-            <FileUpload onUploadComplete={handleFileUploadComplete} />
+            <div>
+              <FileUpload onUploadComplete={handleFileUploadComplete} />
+              {resumeText && resumeFileName && (
+                <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded-lg">
+                  <div className="flex items-center gap-2">
+                    <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    <span className="font-medium text-green-800">{resumeFileName}</span>
+                  </div>
+                  <p className="text-sm text-green-700 mt-1">
+                    {resumeText.length} characters extracted. Ready for analysis.
+                  </p>
+                </div>
+              )}
+            </div>
           ) : (
             <textarea
               value={resumeText}
@@ -107,11 +129,6 @@ export const AnalysisForm = () => {
               placeholder="Paste the resume text here..."
               required
             />
-          )}
-          {resumeText && useFileUpload && (
-            <p className="text-sm text-green-600 mt-2">
-              ✓ PDF uploaded. {resumeText.length} characters extracted.
-            </p>
           )}
         </div>
 
