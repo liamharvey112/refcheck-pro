@@ -1,25 +1,20 @@
-import { BaseModal } from '../base/BaseModal';
-import type { Analysis } from '../../types/analysis.types';
+import { Modal } from '../ui/Modal';
+import { Badge } from '../ui/Badge';
+import { getRiskColor } from '../../utils/formatters';
+import { type Analysis } from '../../types/analysis.types';
 
 interface AnalysisDetailModalProps {
     analysis: Analysis | null;
     onClose: () => void;
 }
 
-const getRiskColor = (risk: string) => {
-    switch (risk) {
-        case 'Low': return 'bg-green-100 text-green-800';
-        case 'Medium': return 'bg-yellow-100 text-yellow-800';
-        case 'High': return 'bg-red-100 text-red-800';
-        default: return 'bg-gray-100 text-gray-800';
-    }
-};
-
 export const AnalysisDetailModal = ({ analysis, onClose }: AnalysisDetailModalProps) => {
-    if (!analysis) return null;
-
+    if (!analysis) {
+        return null;
+    }
+    
     return (
-        <BaseModal isOpen={!!analysis} onClose={onClose} title="Analysis Details" size="lg">
+        <Modal isOpen={!!analysis} onClose={onClose} title="Analysis Details" size="lg">
             <div className="space-y-4">
                 <div>
                     <h4 className="font-semibold text-gray-900">Job Description</h4>
@@ -33,9 +28,9 @@ export const AnalysisDetailModal = ({ analysis, onClose }: AnalysisDetailModalPr
                 )}
                 <div>
                     <h4 className="font-semibold text-gray-900">Risk Assessment</h4>
-                    <span className={`inline-block mt-1 px-2 py-1 rounded-full text-sm font-medium ${getRiskColor(analysis.risk)}`}>
+                    <Badge variant={getRiskColor(analysis.risk)} className="mt-1">
                         {analysis.risk} Risk
-                    </span>
+                    </Badge>
                 </div>
                 <div>
                     <h4 className="font-semibold text-gray-900">Inconsistencies Found</h4>
@@ -68,14 +63,12 @@ export const AnalysisDetailModal = ({ analysis, onClose }: AnalysisDetailModalPr
                             <p className="text-gray-500">No missing skills identified</p>
                         ) : (
                             analysis.missingSkills.map((skill, i) => (
-                                <span key={i} className="bg-yellow-100 text-yellow-800 px-2 py-1 rounded text-sm">
-                                    {skill}
-                                </span>
+                                <Badge key={i} variant="warning">{skill}</Badge>
                             ))
                         )}
                     </div>
                 </div>
             </div>
-        </BaseModal>
+        </Modal>
     );
 };

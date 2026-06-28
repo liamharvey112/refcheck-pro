@@ -1,5 +1,6 @@
-import { HistoryCard } from "../cards/HistoryCard";
-import type { Analysis } from "../../types/analysis.types";
+import { Card } from '../ui/Card';
+import { HistoryCard } from './HistoryCard';
+import { type Analysis } from '../../types/analysis.types';
 
 interface HistoryListProps {
     analyses: Analysis[];
@@ -9,16 +10,18 @@ interface HistoryListProps {
 export const HistoryList = ({ analyses, onSelect }: HistoryListProps) => {
     if (analyses.length === 0) {
         return (
-            <div className="bg-white rounded-lg shadow p-8 text-center">
-                <p className="text-gray-500">No analyses yet. Go to the home page to analyze a candidate.</p>
-            </div>
+            <Card>
+                <p className="text-gray-500 text-center py-8">
+                    No analyses yet. Go to the Analyse page to get started.
+                </p>
+            </Card>
         );
     }
 
     return (
         <div className="space-y-3">
             {analyses.map((analysis) => (
-                <HistoryCard 
+                <HistoryCard
                     key={analysis.id}
                     id={analysis.id}
                     jobDescription={analysis.jobDescription}
@@ -30,4 +33,4 @@ export const HistoryList = ({ analyses, onSelect }: HistoryListProps) => {
             ))}
         </div>
     );
-}
+};

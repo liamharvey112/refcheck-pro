@@ -1,77 +1,52 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
-import { AnalysisForm } from './components/AnalysisForm';
+import { useToast } from './contexts/ToastContext';
+import { AnalyseView } from './views/AnalyseView';
 import { HistoryView } from './views/HistoryView';
+import { Navbar } from './components/layout/Navbar';
+import { ErrorBoundary } from './components/feedback/ErrorBoundary';
+import { Spinner } from './components/ui/Spinner';
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
-type Page = 'analyze' | 'history';
+type Page = 'analyse' | 'history';
 
 function AppContent() {
-    const { user, login, logout, isAuthenticated, loading } = useAuth();
-    const [currentPage, setCurrentPage] = useState<Page>('analyze');
+    const { loading, isAuthenticated } = useAuth();
+    const { showToast } = useToast();
+    const [currentPage, setCurrentPage] = useState<Page>('analyse');
+    const [hasShownWelcome, setHasShownWelcome] = useState(false);
+
+     useEffect(() => {
+        if (isAuthenticated && !hasShownWelcome) {
+            showToast('Welcome to RefCheck Pro! 🚀', 'success');
+            setHasShownWelcome(true);
+        }
+    }, [isAuthenticated, showToast, hasShownWelcome]);
 
     if (loading) {
         return (
             <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-                <div className="text-center">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto"></div>
-                    <p className="mt-2 text-gray-600">Loading...</p>
-                </div>
+                <Spinner size="lg" />
             </div>
         );
     }
 
     return (
         <div className="min-h-screen bg-gray-50">
-            <div className="container mx-auto p-6">
-                <div className="flex justify-between items-center mb-8">
-                    <h1 className="text-3xl font-bold text-gray-900">RefCheck Pro</h1>
+            <Navbar currentPage={currentPage} onPageChange={setCurrentPage} />
+            <div className="py-6">
+                <ErrorBoundary>
                     {isAuthenticated ? (
-                        <div className="flex items-center gap-4">
-                            <div className="flex gap-2">
-                                <button
-                                    onClick={() => setCurrentPage('analyze')}
-                                    className={`px-3 py-1 rounded ${currentPage === 'analyze' ? 'bg-blue-100 text-blue-700' : 'text-gray-600'}`}
-                                >
-                                    Analyze
-                                </button>
-                                <button
-                                    onClick={() => setCurrentPage('history')}
-                                    className={`px-3 py-1 rounded ${currentPage === 'history' ? 'bg-blue-100 text-blue-700' : 'text-gray-600'}`}
-                                >
-                                    History
-                                </button>
-                            </div>
-                            {user?.avatarUrl && (
-                                <img src={user.avatarUrl} alt={user.name} className="w-8 h-8 rounded-full" />
-                            )}
-                            <span className="text-gray-700">{user?.name}</span>
-                            <button
-                                onClick={logout}
-                                className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700"
-                            >
-                                Logout
-                            </button>
-                        </div>
+                        currentPage === 'analyse' ? <AnalyseView /> : <HistoryView />
                     ) : (
-                        <button
-                            onClick={login}
-                            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center gap-2"
-                        >
-                            Sign in with Google
-                        </button>
+                        <div className="max-w-md mx-auto mt-20 p-6 bg-white border border-gray-200 rounded-lg shadow-sm text-center">
+                            <h2 className="text-xl font-semibold text-gray-900 mb-2">Welcome to RefCheck Pro</h2>
+                            <p className="text-gray-600">Sign in with Google to start analyzing candidates.</p>
+                        </div>
                     )}
-                </div>
-                
-                {isAuthenticated ? (
-                    currentPage === 'analyze' ? <AnalysisForm /> : <HistoryView />
-                ) : (
-                    <div className="bg-white rounded-lg shadow p-6 text-center">
-                        <p className="text-gray-600">Sign in with Google to start analyzing candidates.</p>
-                    </div>
-                )}
+                </ErrorBoundary>
             </div>
         </div>
     );
@@ -90,11 +65,13 @@ function App() {
     }
 
     return (
-        <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
-            <AuthProvider>
-                <AppContent />
-            </AuthProvider>
-        </GoogleOAuthProvider>
+        <ErrorBoundary>
+            <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
+                <AuthProvider>
+                    <AppContent />
+                </AuthProvider>
+            </GoogleOAuthProvider>
+        </ErrorBoundary>
     );
 }
 
